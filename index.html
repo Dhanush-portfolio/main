@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Swarna Mahal – Jewellery Billing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── Theme Variables ── */
+:root {
+  --primary: #c9a84c;
+  --primary-light: #f0d080;
+  --primary-dark: #8b6914;
+  --bg-dark: #1a1208;
+  --bg-dark2: #2d1f05;
+  --paper: #fef9ee;
+  --paper2: #fffdf5;
+  --shadow: rgba(139,105,20,0.18);
+  --border: #e2c97e;
+  --ink: #1a1208;
+  --accent-glow: rgba(201,168,76,0.12);
+  --accent-glow2: rgba(201,168,76,0.08);
+  --receipt-border: #c9a84c;
+  --receipt-inner: rgba(201,168,76,0.3);
+  --watermark-color: rgba(201,168,76,0.07);
+  --focus-ring: rgba(201,168,76,.15);
+  --card-inner: rgba(201,168,76,.15);
+  --summary-total-border: #c9a84c;
+  --rate-bg1: #1a1208;
+  --rate-bg2: #2d1f05;
+  --rate-div: rgba(201,168,76,.3);
+  --rate-edit-bg: #2d1f05;
+  --rate-edit-border: #8b6914;
+  --badge-color: #8b6914;
+  --tbl-hover: rgba(201,168,76,.05);
+  --tbl-border: rgba(226,201,126,.3);
+  --btn-gen-from: #8b6914;
+  --btn-gen-to: #c9a84c;
+  --btn-gen-shadow: rgba(139,105,20,.35);
+  --btn-gen-shadow2: rgba(139,105,20,.55);
+  --btn-outline-color: #8b6914;
+  --summary-label: #5a4010;
+  --lbl-color: #8b6914;
+  transition: all .4s ease;
+}
+
+body.silver-mode {
+  --primary: #a8b8c8;
+  --primary-light: #dde8f0;
+  --primary-dark: #4a6070;
+  --bg-dark: #0d1217;
+  --bg-dark2: #1a2530;
+  --paper: #f4f7fa;
+  --paper2: #f8fafc;
+  --shadow: rgba(74,96,112,0.18);
+  --border: #9ab0c0;
+  --ink: #0d1a22;
+  --accent-glow: rgba(168,184,200,0.12);
+  --accent-glow2: rgba(168,184,200,0.08);
+  --receipt-border: #a8b8c8;
+  --receipt-inner: rgba(168,184,200,0.3);
+  --watermark-color: rgba(168,184,200,0.07);
+  --focus-ring: rgba(168,184,200,.2);
+  --card-inner: rgba(168,184,200,.15);
+  --summary-total-border: #a8b8c8;
+  --rate-bg1: #0d1217;
+  --rate-bg2: #1a2530;
+  --rate-div: rgba(168,184,200,.3);
+  --rate-edit-bg: #1a2530;
+  --rate-edit-border: #4a6070;
+  --badge-color: #4a6070;
+  --tbl-hover: rgba(168,184,200,.05);
+  --tbl-border: rgba(154,176,192,.3);
+  --btn-gen-from: #4a6070;
+  --btn-gen-to: #a8b8c8;
+  --btn-gen-shadow: rgba(74,96,112,.35);
+  --btn-gen-shadow2: rgba(74,96,112,.55);
+  --btn-outline-color: #4a6070;
+  --summary-label: #2a4050;
+  --lbl-color: #4a6070;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-dark);
+  background-image:
+    radial-gradient(ellipse at 20% 20%, var(--accent-glow) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, var(--accent-glow2) 0%, transparent 60%);
+  font-family: 'EB Garamond', Georgia, serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 48px;
+  transition: background .5s;
+}
+
+/* ── Toggle Switch ── */
+.mode-switch-wrap {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+  animation: fadeDown .5s ease both;
+}
+.mode-label {
+  font-family: 'Cinzel', serif;
+  font-size: .85rem;
+  letter-spacing: 2px;
+  transition: color .3s;
+}
+.mode-label.gold-lbl { color: #c9a84c; }
+.mode-label.silver-lbl { color: #a8b8c8; }
+.mode-label.active { opacity: 1; font-weight: 700; }
+.mode-label.inactive { opacity: .4; }
+
+.toggle {
+  position: relative;
+  width: 72px; height: 34px;
+  cursor: pointer;
+}
+.toggle input { display: none; }
+.toggle-track {
+  position: absolute; inset: 0;
+  border-radius: 34px;
+  background: linear-gradient(135deg, #8b6914, #c9a84c);
+  transition: background .4s;
+  box-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+body.silver-mode .toggle-track {
+  background: linear-gradient(135deg, #4a6070, #a8b8c8);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+body.silver-mode .toggle-thumb { transform: translateX(38px); }
+.toggle-thumb::after { content: '✦'; color: #c9a84c; }
+body.silver-mode .toggle-thumb::after { content: '◈'; color: #6a90a8; }
+
+/* ── Header ── */
+.app-header {
+  text-align: center;
+  margin-bottom: 24px;
+  animation: fadeDown .7s ease both;
+}
+.app-header .crown { font-size: 1.8rem; letter-spacing: 8px; color: var(--primary); margin-bottom: 4px; transition: color .4s; }
+.app-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  color: var(--primary-light);
+  letter-spacing: 3px;
+  text-shadow: 0 2px 16px var(--accent-glow);
+  transition: color .4s, text-shadow .4s;
+}
+.app-header p { color: var(--primary); opacity: .6; font-style: italic; font-size: 1rem; margin-top: 4px; transition: color .4s; }
+.metal-badge {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: 'Cinzel', serif;
+  font-size: .75rem;
+  letter-spacing: 3px;
+  padding: 4px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--primary);
+  color: var(--primary-light);
+  text-transform: uppercase;
+  transition: all .4s;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 32px;
+  box-shadow: 0 8px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,.7);
+  animation: fadeUp .5s ease both;
+  position: relative;
+  transition: background .4s, border-color .4s, box-shadow .4s;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 6px;
+  border: 1px solid var(--card-inner);
+  border-radius: 6px;
+  pointer-events: none;
+  transition: border-color .4s;
+}
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  transition: color .4s, border-color .4s;
+}
+
+/* ── Layout ── */
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 980px; margin-bottom: 20px; }
+@media(max-width:680px){ .main-grid { grid-template-columns: 1fr; } }
+.full-width { max-width: 980px; width: 100%; margin-bottom: 20px; }
+
+/* ── Form Controls ── */
+label {
+  display: block;
+  font-size: .82rem;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 1px;
+  color: var(--lbl-color);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  transition: color .4s;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--paper2);
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .4s;
+  margin-bottom: 14px;
+}
+input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
+
+/* ── Rate Banner ── */
+.rate-banner {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: linear-gradient(135deg, var(--rate-bg1) 60%, var(--rate-bg2));
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 14px 22px;
+  margin-bottom: 20px;
+  max-width: 980px; width: 100%;
+  animation: fadeDown .5s .1s ease both;
+  transition: background .4s, border-color .4s;
+}
+.rate-item { display: flex; flex-direction: column; }
+.rate-item span:first-child { font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:2px; color: var(--primary); transition: color .4s; }
+.rate-item span:last-child { font-size: 1.25rem; color: var(--primary-light); font-weight: 600; transition: color .4s; }
+.rate-divider { width:1px; height:36px; background: var(--rate-div); transition: background .4s; }
+.rate-edit input { width:120px; margin:0; padding:6px 10px; font-size:.95rem; background: var(--rate-edit-bg); color: var(--primary-light); border:1px solid var(--rate-edit-border); border-radius:4px; transition: all .4s; }
+.rate-badge { margin-left:auto; font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:1px; color: var(--badge-color); border:1px solid var(--badge-color); padding:4px 10px; border-radius:20px; transition: all .4s; }
+
+/* ── Items Table ── */
+.items-table { width:100%; border-collapse:collapse; font-size:.95rem; }
+.items-table th { font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:1.5px; color: var(--primary-dark); text-transform:uppercase; border-bottom:2px solid var(--border); padding:8px 10px; text-align:left; transition: color .4s, border-color .4s; }
+.items-table td { padding:8px 10px; border-bottom:1px solid var(--tbl-border); vertical-align:middle; transition: border-color .4s; }
+.items-table tr:hover td { background: var(--tbl-hover); }
+.items-table input, .items-table select { margin-bottom:0; padding:5px 8px; font-size:.9rem; }
+.del-btn { background:none; border:none; cursor:pointer; color:#b05050; font-size:1.1rem; transition: color .2s; padding:2px 6px; }
+.del-btn:hover { color:#e05050; }
+
+/* ── Buttons ── */
+.btn { font-family:'Cinzel',serif; font-size:.8rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; border:none; border-radius:5px; padding:10px 22px; transition: all .2s; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--btn-gen-from), var(--btn-gen-to));
+  color: #fff;
+  box-shadow: 0 3px 12px var(--btn-gen-shadow);
+}
+.btn-primary:hover { box-shadow: 0 5px 18px var(--btn-gen-shadow2); transform:translateY(-1px); }
+.btn-outline { background:transparent; border:1px solid var(--btn-outline-color); color: var(--btn-outline-color); transition: all .3s; }
+.btn-outline:hover { background: var(--focus-ring); }
+.btn-danger { background:#b05050; color:#fff; }
+.btn-danger:hover { background:#e05050; }
+.btn-print { background: #2c4a2c; color:#d0f0d0; }
+.btn-print:hover { background:#3a6a3a; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+
+/* ── Summary ── */
+.summary-box { background: var(--paper2); border:1px solid var(--border); border-radius:8px; padding:20px 24px; transition: all .4s; }
+.summary-line { display:flex; justify-content:space-between; padding:5px 0; font-size:1rem; }
+.summary-line.total { border-top:2px solid var(--summary-total-border); margin-top:8px; padding-top:10px; font-family:'Cinzel',serif; font-size:1.15rem; font-weight:700; color: var(--primary-dark); transition: color .4s, border-color .4s; }
+.summary-label { color: var(--summary-label); transition: color .4s; }
+.summary-value { font-weight:500; }
+.discount-row { display:flex; gap:10px; align-items:center; }
+.discount-row input { margin:0; width:90px; }
+.discount-row select { margin:0; width:70px; }
+
+/* ── Receipt ── */
+#receiptArea { display:none; }
+.receipt {
+  font-family:'EB Garamond',serif;
+  background:#fff;
+  max-width:420px; width:100%;
+  margin:0 auto;
+  padding:32px 28px;
+  border:2px double var(--receipt-border);
+  border-radius:6px;
+  box-shadow:0 0 30px rgba(0,0,0,.2);
+  position:relative;
+  transition: border-color .4s;
+}
+.receipt::after { content:''; position:absolute; inset:6px; border:1px solid var(--receipt-inner); border-radius:3px; pointer-events:none; transition: border-color .4s; }
+.receipt-header { text-align:center; margin-bottom:16px; }
+.receipt-header h2 { font-family:'Cinzel',serif; font-size:1.4rem; color: var(--primary-dark); letter-spacing:2px; transition: color .4s; }
+.receipt-header p { font-size:.85rem; color:#666; margin:2px 0; }
+.receipt-meta { display:flex; justify-content:space-between; font-size:.85rem; color:#555; border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px 0; margin:12px 0; transition: border-color .4s; }
+.receipt-table { width:100%; border-collapse:collapse; font-size:.88rem; margin-bottom:12px; }
+.receipt-table th { text-align:left; font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:1px; color: var(--primary-dark); padding:4px 6px; border-bottom:1px solid var(--border); transition: color .4s, border-color .4s; }
+.receipt-table td { padding:5px 6px; border-bottom:1px dashed var(--border); transition: border-color .4s; }
+.receipt-totals { font-size:.92rem; }
+.r-line { display:flex; justify-content:space-between; padding:3px 0; }
+.r-total { font-family:'Cinzel',serif; font-size:1.05rem; font-weight:700; color: var(--primary-dark); border-top:2px solid var(--primary); padding-top:6px; margin-top:4px; display:flex; justify-content:space-between; transition: color .4s, border-color .4s; }
+.receipt-footer { text-align:center; margin-top:18px; font-style:italic; font-size:.85rem; color:#888; border-top:1px solid var(--border); padding-top:10px; transition: border-color .4s; }
+.watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-family:'Cinzel',serif; font-size:3.5rem; color: var(--watermark-color); pointer-events:none; white-space:nowrap; letter-spacing:4px; }
+
+/* ── Animations ── */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
+@keyframes modeFlash { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:1} }
+
+.mode-transition { animation: modeFlash .4s ease; }
+
+@media print {
+  body { background:#fff; padding:0; }
+  .no-print { display:none !important; }
+  #receiptArea { display:block !important; }
+  .receipt { box-shadow:none; }
+}
+</style>
+</head>
+<body id="appBody">
+
+<!-- Mode Switch -->
+<div class="mode-switch-wrap no-print">
+  <span class="mode-label gold-lbl active" id="goldLbl">GOLD</span>
+  <label class="toggle" title="Switch between Gold and Silver mode">
+    <input type="checkbox" id="modeToggle" onchange="switchMode(this.checked)"/>
+    <div class="toggle-track"></div>
+    <div class="toggle-thumb"></div>
+  </label>
+  <span class="mode-label silver-lbl inactive" id="silverLbl">SILVER</span>
+</div>
+
+<!-- Header -->
+<div class="app-header">
+  <div class="crown" id="headerCrown">✦ ✦ ✦</div>
+  <h1>SWARNA MAHAL</h1>
+  <p id="headerSub">Gold &amp; Jewellery — Billing System</p>
+  <div class="metal-badge" id="metalBadge">🥇 Gold Billing</div>
+</div>
+
+<!-- Rate Banner -->
+<div class="rate-banner no-print" id="rateBanner">
+  <!-- Gold rates (shown by default) -->
+  <div id="goldRates" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;flex:1">
+    <div class="rate-item"><span>24K / gram</span><span id="dispRate24">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-item"><span>22K / gram</span><span id="dispRate22">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-item"><span>18K / gram</span><span id="dispRate18">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-edit">
+      <span style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:2px;color:var(--primary);display:block;margin-bottom:4px;">SET 24K RATE (₹/g)</span>
+      <input type="number" id="rate24Input" placeholder="e.g. 6800" min="0" step="1" oninput="updateGoldRates()"/>
+    </div>
+  </div>
+  <!-- Silver rates (hidden by default) -->
+  <div id="silverRates" style="display:none;align-items:center;gap:16px;flex-wrap:wrap;flex:1">
+    <div class="rate-item"><span>999 Pure / gram</span><span id="dispRateS999">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-item"><span>925 Sterling / gram</span><span id="dispRateS925">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-item"><span>800 Silver / gram</span><span id="dispRateS800">₹0.00</span></div>
+    <div class="rate-divider"></div>
+    <div class="rate-edit">
+      <span style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:2px;color:var(--primary);display:block;margin-bottom:4px;">SET 999 RATE (₹/g)</span>
+      <input type="number" id="rateSilverInput" placeholder="e.g. 90" min="0" step="0.5" oninput="updateSilverRates()"/>
+    </div>
+  </div>
+  <div class="rate-badge" id="rateBadge">Live Rates</div>
+</div>
+
+<!-- Shop & Customer -->
+<div class="main-grid no-print">
+  <div class="card" style="animation-delay:.05s">
+    <div class="card-title" id="shopCardTitle">🏪 Shop Details</div>
+    <label>Shop Name</label>
+    <input type="text" id="shopName" value="Swarna Mahal Jewellers"/>
+    <label>Address</label>
+    <input type="text" id="shopAddr" value="12, Gold Street, Coimbatore – 641001"/>
+    <div class="form-row">
+      <div><label>Phone</label><input type="text" id="shopPhone" value="+91 98765 43210"/></div>
+      <div><label>GST No.</label><input type="text" id="shopGST" value="33AABCS1429B1Z5"/></div>
+    </div>
+  </div>
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-title">👤 Customer Details</div>
+    <label>Customer Name</label>
+    <input type="text" id="custName" placeholder="Enter customer name"/>
+    <label>Phone</label>
+    <input type="text" id="custPhone" placeholder="+91 XXXXX XXXXX"/>
+    <div class="form-row">
+      <div><label>Bill No.</label><input type="text" id="billNo"/></div>
+      <div><label>Bill Date</label><input type="date" id="billDate"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- Items -->
+<div class="full-width no-print">
+  <div class="card" style="animation-delay:.15s">
+    <div class="card-title" id="itemsCardTitle">💍 Items</div>
+    <div style="overflow-x:auto">
+      <table class="items-table" id="itemsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th id="purityHeader">Purity (K)</th>
+            <th>Gross Wt (g)</th>
+            <th>Net Wt (g)</th>
+            <th>Making (%)</th>
+            <th>Amount (₹)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-outline" onclick="addItem()">+ Add Item</button>
+      <button class="btn btn-outline" onclick="clearItems()">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment & Summary -->
+<div class="main-grid no-print">
+  <div class="card" style="animation-delay:.2s">
+    <div class="card-title">💳 Payment</div>
+    <label>Payment Mode</label>
+    <select id="payMode">
+      <option>Cash</option>
+      <option>UPI / PhonePe / GPay</option>
+      <option>Card (Debit/Credit)</option>
+      <option>Net Banking / NEFT</option>
+      <option>Cheque</option>
+      <option>Part Payment</option>
+    </select>
+    <label>Notes / Remarks</label>
+    <textarea id="remarks" rows="3" style="resize:vertical;margin-bottom:0" placeholder="e.g. Old exchange, advance paid…"></textarea>
+  </div>
+  <div class="card" style="animation-delay:.25s">
+    <div class="card-title">🧾 Bill Summary</div>
+    <div class="summary-box">
+      <div class="summary-line"><span class="summary-label">Subtotal</span><span class="summary-value" id="sumSubtotal">₹0.00</span></div>
+      <div class="summary-line"><span class="summary-label" id="gstLabel">GST (3%)</span><span class="summary-value" id="sumGST">₹0.00</span></div>
+      <div class="summary-line">
+        <span class="summary-label">Discount</span>
+        <span class="summary-value">
+          <span class="discount-row">
+            <input type="number" id="discountVal" placeholder="0" min="0" oninput="recalc()"/>
+            <select id="discountType" onchange="recalc()"><option value="flat">₹</option><option value="pct">%</option></select>
+          </span>
+        </span>
+      </div>
+      <div class="summary-line total"><span>GRAND TOTAL</span><span id="sumTotal">₹0.00</span></div>
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
+      <button class="btn btn-print" onclick="printBill()">🖨 Print</button>
+      <button class="btn btn-danger" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt -->
+<div class="full-width" id="receiptArea">
+  <div class="receipt" id="receiptDoc">
+    <div class="watermark" id="rWatermark">PAID</div>
+    <div class="receipt-header">
+      <h2 id="rShopName">Swarna Mahal</h2>
+      <p id="rShopAddr"></p>
+      <p id="rShopPhone"></p>
+      <p style="font-size:.75rem;color:#999" id="rGST"></p>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:4px 0 16px"/>
+    <div class="receipt-meta">
+      <div><strong>Bill No:</strong> <span id="rBillNo">—</span></div>
+      <div><strong>Date:</strong> <span id="rBillDate">—</span></div>
+    </div>
+    <div style="font-size:.9rem;margin-bottom:12px">
+      <strong>Customer:</strong> <span id="rCustName">—</span> &nbsp;|&nbsp;
+      <strong>Ph:</strong> <span id="rCustPhone">—</span>
+    </div>
+    <div style="font-size:.8rem;margin-bottom:8px;color:#777" id="rMetalType"></div>
+    <table class="receipt-table">
+      <thead><tr><th>#</th><th>Item</th><th>Purity</th><th>Wt(g)</th><th>Amount</th></tr></thead>
+      <tbody id="rItems"></tbody>
+    </table>
+    <div class="receipt-totals">
+      <div class="r-line"><span>Subtotal</span><span id="rSubtotal"></span></div>
+      <div class="r-line"><span id="rGSTLabel">GST (3%)</span><span id="rGST2"></span></div>
+      <div class="r-line" id="rDiscRow" style="display:none"><span>Discount</span><span id="rDisc"></span></div>
+      <div class="r-total"><span>GRAND TOTAL</span><span id="rTotal"></span></div>
+    </div>
+    <div style="margin-top:12px;font-size:.85rem;color:#555">
+      <strong>Payment:</strong> <span id="rPayMode"></span>
+    </div>
+    <div id="rRemarksWrap" style="display:none;margin-top:6px;font-size:.82rem;color:#777;font-style:italic">
+      <span id="rRemarks"></span>
+    </div>
+    <div class="receipt-footer" id="rFooter">
+      Thank you for choosing <em>Swarna Mahal</em>.<br/>
+      Certified Pure Gold · BIS Hallmarked · Est. 1985
+    </div>
+  </div>
+  <div class="btn-row no-print" style="justify-content:center;margin-top:16px">
+    <button class="btn btn-print" onclick="window.print()">🖨 Print Receipt</button>
+    <button class="btn btn-outline" onclick="document.getElementById('receiptArea').style.display='none'">← Back to Edit</button>
+  </div>
+</div>
+
+<script>
+// ──────────────── State ────────────────
+let mode = 'gold'; // 'gold' | 'silver'
+let rate24 = 0;
+let rateSilver999 = 0;
+let items = [];
+let billCounter = 1000;
+
+// Purity options per mode
+const GOLD_PURITIES = ['24','22','18','14','9'];
+const SILVER_PURITIES = ['999','925','800','925S','750'];
+const SILVER_PURITY_LABELS = { '999':'999 Pure','925':'925 Sterling','800':'800 Silver','925S':'925 Silver','750':'750 Silver' };
+
+// ──────────────── Init ────────────────
+window.onload = () => {
+  document.getElementById('billDate').valueAsDate = new Date();
+  document.getElementById('billNo').value = 'SM-G-' + (++billCounter);
+  addItem();
+};
+
+// ──────────────── Mode Switch ────────────────
+function switchMode(isSilver) {
+  mode = isSilver ? 'silver' : 'gold';
+  const body = document.getElementById('appBody');
+  body.classList.toggle('silver-mode', isSilver);
+  body.classList.add('mode-transition');
+  setTimeout(() => body.classList.remove('mode-transition'), 500);
+
+  // Labels
+  document.getElementById('goldLbl').classList.toggle('active', !isSilver);
+  document.getElementById('goldLbl').classList.toggle('inactive', isSilver);
+  document.getElementById('silverLbl').classList.toggle('active', isSilver);
+  document.getElementById('silverLbl').classList.toggle('inactive', !isSilver);
+
+  // Header
+  document.getElementById('headerCrown').textContent = isSilver ? '◈ ◈ ◈' : '✦ ✦ ✦';
+  document.getElementById('headerSub').textContent = isSilver ? 'Silver & Jewellery — Billing System' : 'Gold & Jewellery — Billing System';
+  document.getElementById('metalBadge').textContent = isSilver ? '🥈 Silver Billing' : '🥇 Gold Billing';
+
+  // Rate banner
+  document.getElementById('goldRates').style.display = isSilver ? 'none' : 'flex';
+  document.getElementById('silverRates').style.display = isSilver ? 'flex' : 'none';
+
+  // Items table header
+  document.getElementById('purityHeader').textContent = isSilver ? 'Purity' : 'Purity (K)';
+  document.getElementById('itemsCardTitle').textContent = isSilver ? '⚬ Items' : '💍 Items';
+
+  // Bill number prefix
+  document.getElementById('billNo').value = isSilver
+    ? 'SM-S-' + billCounter
+    : 'SM-G-' + billCounter;
+
+  // GST label — silver is also 3% GST
+  document.getElementById('gstLabel').textContent = 'GST (3%)';
+
+  // Footer
+  document.getElementById('rFooter').innerHTML = isSilver
+    ? 'Thank you for choosing <em>Swarna Mahal</em>.<br/>Pure Silver · Hallmarked · Est. 1985'
+    : 'Thank you for choosing <em>Swarna Mahal</em>.<br/>Certified Pure Gold · BIS Hallmarked · Est. 1985';
+
+  // Re-render items with correct purity options
+  items.forEach(item => {
+    item.purity = isSilver ? '925' : '22';
+  });
+  renderTable();
+  recalc();
+}
+
+// ──────────────── Rates ────────────────
+function updateGoldRates() {
+  rate24 = parseFloat(document.getElementById('rate24Input').value) || 0;
+  document.getElementById('dispRate24').textContent = fmt(rate24);
+  document.getElementById('dispRate22').textContent = fmt(rate24 * 22/24);
+  document.getElementById('dispRate18').textContent = fmt(rate24 * 18/24);
+  recalc();
+}
+
+function updateSilverRates() {
+  rateSilver999 = parseFloat(document.getElementById('rateSilverInput').value) || 0;
+  document.getElementById('dispRateS999').textContent = fmt(rateSilver999);
+  document.getElementById('dispRateS925').textContent = fmt(rateSilver999 * 925/999);
+  document.getElementById('dispRateS800').textContent = fmt(rateSilver999 * 800/999);
+  recalc();
+}
+
+function getItemRate(purity) {
+  if (mode === 'gold') {
+    const k = parseFloat(purity) || 22;
+    return rate24 * k / 24;
+  } else {
+    // silver purity as per mille
+    const purityMap = { '999':999,'925':925,'800':800,'925S':925,'750':750 };
+    const p = purityMap[purity] || 925;
+    return rateSilver999 * p / 999;
+  }
+}
+
+// ──────────────── Items ────────────────
+function addItem() {
+  const id = Date.now();
+  const defaultPurity = mode === 'silver' ? '925' : '22';
+  items.push({ id, desc:'', purity: defaultPurity, gross:'', net:'', making: mode==='silver'?'8':'12' });
+  renderTable();
+}
+
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  if (!items.length) addItem();
+  else { renderTable(); recalc(); }
+}
+
+function clearItems() { items = []; addItem(); }
+
+function getPurityOptions(selectedPurity) {
+  if (mode === 'gold') {
+    return GOLD_PURITIES.map(k => `<option value="${k}" ${selectedPurity===k?'selected':''}>${k}K</option>`).join('');
+  } else {
+    return [
+      {v:'999', l:'999 Pure'},
+      {v:'925', l:'925 Sterling'},
+      {v:'800', l:'800 Silver'},
+      {v:'750', l:'750 Silver'},
+    ].map(o => `<option value="${o.v}" ${selectedPurity===o.v?'selected':''}>${o.l}</option>`).join('');
+  }
+}
+
+function getPurityLabel(purity) {
+  if (mode === 'gold') return purity + 'K';
+  const labels = {'999':'999','925':'925','800':'800','750':'750'};
+  return labels[purity] || purity;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('itemsBody');
+  tbody.innerHTML = '';
+  items.forEach((item, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--primary-dark);font-family:'Cinzel',serif">${idx+1}</td>
+      <td><input type="text" value="${escHtml(item.desc)}" placeholder="${mode==='silver'?'e.g. Silver Anklet':'e.g. Necklace 22K'}" oninput="setField(${item.id},'desc',this.value)"/></td>
+      <td><select onchange="setField(${item.id},'purity',this.value)">${getPurityOptions(item.purity)}</select></td>
+      <td><input type="number" value="${item.gross}" placeholder="0.000" min="0" step="0.001" oninput="setField(${item.id},'gross',this.value)"/></td>
+      <td><input type="number" value="${item.net}" placeholder="0.000" min="0" step="0.001" oninput="setField(${item.id},'net',this.value)"/></td>
+      <td><input type="number" value="${item.making}" placeholder="${mode==='silver'?'8':'12'}" min="0" step="0.1" oninput="setField(${item.id},'making',this.value)"/></td>
+      <td style="color:var(--primary-dark);font-weight:600;white-space:nowrap" id="amt-${item.id}">${fmt(itemAmt(item))}</td>
+      <td><button class="del-btn" onclick="removeItem(${item.id})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  recalc();
+}
+
+function setField(id, field, val) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item[field] = val;
+  const cell = document.getElementById('amt-' + id);
+  if (cell) cell.textContent = fmt(itemAmt(item));
+  recalc();
+}
+
+function itemAmt(item) {
+  const net = parseFloat(item.net) || parseFloat(item.gross) || 0;
+  const rate = getItemRate(item.purity);
+  const making = parseFloat(item.making) || 0;
+  const base = net * rate;
+  return base + base * making / 100;
+}
+
+// ──────────────── Calc ────────────────
+function recalc() {
+  const sub = items.reduce((s, i) => s + itemAmt(i), 0);
+  const gst = sub * 0.03;
+  const dVal = parseFloat(document.getElementById('discountVal').value) || 0;
+  const dType = document.getElementById('discountType').value;
+  const disc = dType === 'pct' ? sub * dVal / 100 : dVal;
+  const total = sub + gst - disc;
+  document.getElementById('sumSubtotal').textContent = fmt(sub);
+  document.getElementById('sumGST').textContent = fmt(gst);
+  document.getElementById('sumTotal').textContent = fmt(Math.max(0, total));
+}
+
+// ──────────────── Generate Bill ────────────────
+function generateBill() {
+  document.getElementById('rShopName').textContent = v('shopName');
+  document.getElementById('rShopAddr').textContent = v('shopAddr');
+  document.getElementById('rShopPhone').textContent = v('shopPhone');
+  document.getElementById('rGST').textContent = 'GSTIN: ' + v('shopGST');
+  document.getElementById('rBillNo').textContent = v('billNo');
+  document.getElementById('rBillDate').textContent = fmtDate(v('billDate'));
+  document.getElementById('rCustName').textContent = v('custName') || '—';
+  document.getElementById('rCustPhone').textContent = v('custPhone') || '—';
+  document.getElementById('rPayMode').textContent = v('payMode');
+  document.getElementById('rMetalType').textContent = mode === 'silver' ? '⚬ Silver Jewellery Bill' : '✦ Gold Jewellery Bill';
+  document.getElementById('rGSTLabel').textContent = 'GST (3%)';
+
+  const remarks = v('remarks');
+  document.getElementById('rRemarksWrap').style.display = remarks ? 'block' : 'none';
+  if (remarks) document.getElementById('rRemarks').textContent = 'Note: ' + remarks;
+
+  const tbody = document.getElementById('rItems');
+  tbody.innerHTML = '';
+  items.filter(i => parseFloat(i.gross) > 0 || i.desc).forEach((item, idx) => {
+    const tr = document.createElement('tr');
+    const net = parseFloat(item.net) || parseFloat(item.gross) || 0;
+    tr.innerHTML = `<td>${idx+1}</td><td>${escHtml(item.desc)||'—'}</td><td>${getPurityLabel(item.purity)}</td><td>${net.toFixed(3)}</td><td>${fmt(itemAmt(item))}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const sub = items.reduce((s,i)=>s+itemAmt(i),0);
+  const gst = sub * 0.03;
+  const dVal = parseFloat(document.getElementById('discountVal').value)||0;
+  const dType = document.getElementById('discountType').value;
+  const disc = dType==='pct' ? sub*dVal/100 : dVal;
+  const total = Math.max(0, sub+gst-disc);
+
+  document.getElementById('rSubtotal').textContent = fmt(sub);
+  document.getElementById('rGST2').textContent = fmt(gst);
+  if (disc > 0) {
+    document.getElementById('rDisc').textContent = '−' + fmt(disc);
+    document.getElementById('rDiscRow').style.display = 'flex';
+  } else document.getElementById('rDiscRow').style.display = 'none';
+  document.getElementById('rTotal').textContent = fmt(total);
+
+  document.getElementById('receiptArea').style.display = 'block';
+  document.getElementById('receiptArea').scrollIntoView({behavior:'smooth'});
+}
+
+function printBill() { generateBill(); setTimeout(()=>window.print(), 400); }
+
+function resetAll() {
+  if (!confirm('Clear all and start a new bill?')) return;
+  ['custName','custPhone','remarks'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('discountVal').value='';
+  document.getElementById('billNo').value = (mode==='silver'?'SM-S-':'SM-G-') + (++billCounter);
+  document.getElementById('billDate').valueAsDate = new Date();
+  document.getElementById('receiptArea').style.display='none';
+  items=[];
+  addItem();
+}
+
+// ──────────────── Helpers ────────────────
+function fmt(n){ return '₹'+(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function v(id){ return document.getElementById(id).value; }
+function fmtDate(d){ if(!d) return new Date().toLocaleDateString('en-IN'); const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
